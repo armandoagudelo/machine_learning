@@ -55,7 +55,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="resultadoModalLabel">El crecimiento esperado del cultivo es:</h5>
+                    <h5 class="modal-title" id="resultadoModalLabel">Resultado:</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
@@ -178,7 +178,7 @@
             resultado = resultado.toFixed(2);
 
             // Mostrar el resultado en el modal
-            $("#resultadoMensaje").text(`El resultado es: ${resultado}`);
+            $("#resultadoMensaje").text(`El crecimiento esperado del cultivo es: ${resultado}`);
             // Abrir el modal de resultado
             $('#resultadoModal').modal('show');
         }
