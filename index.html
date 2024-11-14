@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Cálculo</title>
+    <!-- Enlazar Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Enlazar jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .form-container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="form-container shadow-sm p-4">
+            <h2 class="text-center mb-4">Cálculo de Resultado</h2>
+            <form id="calculationForm">
+                <div class="mb-3">
+                    <label for="temperatura" class="form-label">Temperatura:</label>
+                    <input type="number" id="temperatura" name="temperatura" class="form-control" 
+                           step="0.01" required>
+                    <div id="temperaturaError" class="error"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="humedad" class="form-label">Humedad:</label>
+                    <input type="number" id="humedad" name="humedad" class="form-control" step="0.01" required>
+                    <div id="humedadError" class="error"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="humedad_suelo" class="form-label">Humedad del Suelo:</label>
+                    <input type="number" id="humedad_suelo" name="humedad_suelo" class="form-control" step="0.01" required>
+                    <div id="humedadSueloError" class="error"></div>
+                </div>
+                <button type="button" class="btn btn-success w-100 mb-2" onclick="procesarFormulario()">Calcular</button>
+                <button type="button" class="btn btn-secondary w-100" onclick="reiniciarFormulario()">Reiniciar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Bootstrap para mostrar el resultado -->
+    <div class="modal fade" id="resultadoModal" tabindex="-1" aria-labelledby="resultadoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resultadoModalLabel">Resultado del Cálculo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="resultadoMensaje"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de error para mostrar mensajes de validación -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="errorModalLabel">Error de Validación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMensaje"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enlazar el script de Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Definir las constantes para los rangos
+        const RANGO_TEMPERATURA_MIN = 10;
+        const RANGO_TEMPERATURA_MAX = 40;
+        const RANGO_HUMEDAD_MIN = 0;
+        const RANGO_HUMEDAD_MAX = 100;
+        const RANGO_HUMEDAD_SUELO_MIN = 0;
+        const RANGO_HUMEDAD_SUELO_MAX = 100;
+
+        $(document).ready(function() {
+            // Validación dinámica del campo temperatura
+            $("#temperatura").on("input", function() {
+                let temperatura = parseFloat($(this).val());
+                if (temperatura < RANGO_TEMPERATURA_MIN || temperatura > RANGO_TEMPERATURA_MAX) {
+                    $("#temperaturaError").text(`La temperatura debe estar entre ${RANGO_TEMPERATURA_MIN} y ${RANGO_TEMPERATURA_MAX}.`);
+                    $(this).addClass("is-invalid");
+                } else {
+                    $("#temperaturaError").text("");
+                    $(this).removeClass("is-invalid");
+                }
+            });
+
+            // Validación dinámica del campo humedad
+            $("#humedad").on("input", function() {
+                let humedad = parseFloat($(this).val());
+                if (humedad < RANGO_HUMEDAD_MIN || humedad > RANGO_HUMEDAD_MAX) {
+                    $("#humedadError").text(`La humedad debe estar entre ${RANGO_HUMEDAD_MIN} y ${RANGO_HUMEDAD_MAX}.`);
+                    $(this).addClass("is-invalid");
+                } else {
+                    $("#humedadError").text("");
+                    $(this).removeClass("is-invalid");
+                }
+            });
+
+            // Validación dinámica del campo humedad_suelo
+            $("#humedad_suelo").on("input", function() {
+                let humedad_suelo = parseFloat($(this).val());
+                if (humedad_suelo < RANGO_HUMEDAD_SUELO_MIN || humedad_suelo > RANGO_HUMEDAD_SUELO_MAX) {
+                    $("#humedadSueloError").text(`La humedad del suelo debe estar entre ${RANGO_HUMEDAD_SUELO_MIN} y ${RANGO_HUMEDAD_SUELO_MAX}.`);
+                    $(this).addClass("is-invalid");
+                } else {
+                    $("#humedadSueloError").text("");
+                    $(this).removeClass("is-invalid");
+                }
+            });
+        });
+
+        function procesarFormulario() {
+            // Limpiar los mensajes de error
+            $(".error").text("");
+            $(".form-control").removeClass("is-invalid");
+
+            // Obtener los valores de los campos
+            let temperatura = $("#temperatura").val();
+            let humedad = $("#humedad").val();
+            let humedad_suelo = $("#humedad_suelo").val();
+
+            // Validar si los campos están vacíos (requeridos)
+            if (!temperatura) {
+                $("#temperaturaError").text("Este campo es obligatorio.");
+                $("#temperatura").addClass("is-invalid");
+            }
+
+            if (!humedad) {
+                $("#humedadError").text("Este campo es obligatorio.");
+                $("#humedad").addClass("is-invalid");
+            }
+
+            if (!humedad_suelo) {
+                $("#humedadSueloError").text("Este campo es obligatorio.");
+                $("#humedad_suelo").addClass("is-invalid");
+            }
+
+            // Si algún campo está vacío, no proceder con el cálculo
+            if (!temperatura || !humedad || !humedad_suelo) {
+                return;
+            }
+
+            // Validar los parámetros con la función validarParametros
+            if (!validarParametros(temperatura, humedad, humedad_suelo)) {
+                return; // Si alguna validación falla, no proceder con el cálculo
+            }
+
+            // Calcular el resultado llamando a realizarCalculo
+            let resultado = realizarCalculo(temperatura, humedad, humedad_suelo);
+
+            // Mostrar el resultado en el modal
+            $("#resultadoMensaje").text(`El resultado es: ${resultado}`);
+            // Abrir el modal de resultado
+            $('#resultadoModal').modal('show');
+        }
+
+        // Función para realizar el cálculo matemático
+        function realizarCalculo(temperatura, humedad, humedad_suelo) {
+            return parseFloat(temperatura) + parseFloat(humedad) + parseFloat(humedad_suelo);
+        }
+
+        // Función para validar los parámetros
+        function validarParametros(temperatura, humedad, humedad_suelo) {
+            // Validar si la temperatura está dentro del rango permitido
+            if (parseFloat(temperatura) < RANGO_TEMPERATURA_MIN || parseFloat(temperatura) > RANGO_TEMPERATURA_MAX) {
+                mostrarError(`Por favor, ingresa una temperatura válida entre ${RANGO_TEMPERATURA_MIN} y ${RANGO_TEMPERATURA_MAX}.`);
+                return false;
+            }
+
+            // Validar si la humedad está dentro del rango permitido
+            if (parseFloat(humedad) < RANGO_HUMEDAD_MIN || parseFloat(humedad) > RANGO_HUMEDAD_MAX) {
+                mostrarError(`Por favor, ingresa una humedad válida entre ${RANGO_HUMEDAD_MIN} y ${RANGO_HUMEDAD_MAX}.`);
+                return false;
+            }
+
+            // Validar si la humedad del suelo está dentro del rango permitido
+            if (parseFloat(humedad_suelo) < RANGO_HUMEDAD_SUELO_MIN || parseFloat(humedad_suelo) > RANGO_HUMEDAD_SUELO_MAX) {
+                mostrarError(`Por favor, ingresa una humedad del suelo válida entre ${RANGO_HUMEDAD_SUELO_MIN} y ${RANGO_HUMEDAD_SUELO_MAX}.`);
+                return false;
+            }
+
+            return true; // Si todas las validaciones pasaron, retorna true
+        }
+
+        // Función para mostrar un modal de error
+        function mostrarError(mensaje) {
+            $("#errorMensaje").text(mensaje);
+            $('#errorModal').modal('show');
+        }
+
+        function reiniciarFormulario() {
+            // Limpiar los campos de entrada
+            $("#calculationForm")[0].reset();
+
+            // Eliminar los mensajes de error
+            $(".error").text("");
+
+            // Eliminar clases de validación
+            $(".form-control").removeClass("is-invalid");
+
+            // Limpiar el resultado
+            $("#resultadoMensaje").text("");
+        }
+    </script>
+
+</body>
+</html>
