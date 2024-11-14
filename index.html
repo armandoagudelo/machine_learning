@@ -92,11 +92,11 @@
     <script>
         // Definir las constantes para los rangos
         const RANGO_TEMPERATURA_MIN = 10;
-        const RANGO_TEMPERATURA_MAX = 40;
-        const RANGO_HUMEDAD_MIN = 0;
-        const RANGO_HUMEDAD_MAX = 100;
-        const RANGO_HUMEDAD_SUELO_MIN = 0;
-        const RANGO_HUMEDAD_SUELO_MAX = 100;
+        const RANGO_TEMPERATURA_MAX = 35;
+        const RANGO_HUMEDAD_MIN = 30;
+        const RANGO_HUMEDAD_MAX = 89;
+        const RANGO_HUMEDAD_SUELO_MIN = 10;
+        const RANGO_HUMEDAD_SUELO_MAX = 40;
 
         $(document).ready(function() {
             // Validación dinámica del campo temperatura
@@ -183,7 +183,7 @@
 
         // Función para realizar el cálculo matemático
         function realizarCalculo(temperatura, humedad, humedad_suelo) {
-            return parseFloat(temperatura) + parseFloat(humedad) + parseFloat(humedad_suelo);
+            return (87.654 + 8.609*parseFloat(temperatura) + 13.632*parseFloat(humedad) + 4.387*parseFloat(humedad_suelo));
         }
 
         // Función para validar los parámetros
